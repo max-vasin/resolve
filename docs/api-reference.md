@@ -1962,3 +1962,143 @@ The `params` object exposes the following API:
 | state        | A state object passed between middleware functions.                         |
 | deserializer | Returns a deserealized object from a string.                                |
 | jwtProvider  | Used to get and set the JSON Web Token.                                     |
+
+## TypeScript Types
+
+The **@reimagined/core** package defines types for main building blocks of a reSolve application. It defines the following types:
+
+#### Common
+
+##### Event
+
+```ts
+export type Event = {
+  type: string
+  timestamp: number
+  aggregateId: string
+  aggregateVersion: number
+  payload?: any
+}
+```
+
+#### Write Side
+
+##### Command
+
+```ts
+export type Command = {
+  type: string
+  aggregateId: string
+  aggregateName: string
+  payload?: any
+  jwt?: string
+}
+```
+
+##### Aggregate
+
+```ts
+export type Aggregate = {
+  [key: string]: CommandHandler
+}
+```
+
+##### Command Handler
+
+```ts
+export type CommandHandler = (
+  state: AggregateState, // AggregateState = any
+  command: Command,
+  context: CommandContext
+) => CommandResult | Promise<CommandResult>
+```
+
+##### Command Result
+
+```ts
+export type CommandResult = {
+  type: string
+  payload?: any
+  timestamp?: number
+  aggregateId?: string
+  aggregateVersion?: number
+}
+```
+
+##### Aggregate Projection
+
+```ts
+export type AggregateProjection = {
+  Init?: () => AggregateState
+} & {
+  [key: string]: AggregateEventHandler
+}
+```
+
+##### Event Handler
+
+```ts
+export type AggregateEventHandler = (
+  state: AggregateState, // AggregateState = any
+  event: Event
+) => AggregateState
+```
+
+### Read Side
+
+##### Read Model
+
+```ts
+export type ReadModel<TStore> = {
+  [key: string]: ReadModelEventHandler<TStore>
+} & {
+  Init: ReadModelInitHandler<TStore>
+}
+```
+
+##### Read Model Event Handler
+
+```ts
+type ReadModelEventHandler<TStore> = (
+  store: TStore,
+  event: Event,
+  context: ReadModelHandlerContext
+) => Promise<void>
+```
+
+##### Read Model Resolver
+
+```ts
+type ReadModelResolver<TStore> = (
+  store: TStore,
+  params: SerializableMap,
+  context: ReadModelResolverContext
+) => Promise<any>
+```
+
+##### View Model Projection
+
+```ts
+export type ViewModelProjection<TState> = {
+  Init: ViewModelInitHandler<TState>
+} & {
+  [key: string]: ViewModelEventHandler<TState>
+}
+```
+
+##### View Model Init Handler
+
+```ts
+export type ViewModelInitHandler<TState> = () => TState
+```
+
+##### View Model Event Handler
+
+```ts
+export type ViewModelEventHandler<TState> = (
+  state: TState,
+  event: Event,
+  args: any,
+  context: ViewModelHandlerContext
+) => TState
+```
